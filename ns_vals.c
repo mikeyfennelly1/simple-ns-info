@@ -39,30 +39,30 @@ char* get_proc_self_ns_path(void)
     return proc_self_ns;
 }
 
-char* append_string(char* append_to_me, char* append_me)
-{
-    if (realloc(append_to_me, sizeof(append_to_me) + sizeof(append_me)) == NULL){
-        printf("Could append %s to %s. Exiting...\n", append_me, append_to_me);
+char* append_string(const char* base, const char* to_append) {
+    size_t new_len = strlen(base) + strlen(to_append) + 1;
+    char* new_str = malloc(new_len);
+    if (!new_str) {
+        printf("Failed to allocate memory\n");
         exit(1);
-    };
-
-    strcat(append_to_me, append_me);
-
-    return append_to_me;
+    }
+    strcpy(new_str, base);
+    strcat(new_str, to_append);
+    return new_str;
 }
 
-NAMESPACE_PATHS* get_namespace_paths(void)
-{
+NAMESPACE_PATHS* get_namespace_paths(void) {
     NAMESPACE_PATHS* ns_paths = (NAMESPACE_PATHS*) malloc(sizeof(NAMESPACE_PATHS));
+    char* base_path = get_proc_self_ns_path();
 
-    char* proc_self_ns_path = get_proc_self_ns_path();
-    
-    ns_paths->ipc = append_string(proc_self_ns_path, "ipc");
-    ns_paths->pid = append_string(proc_self_ns_path, "pid");
-    ns_paths->cgroup = append_string(proc_self_ns_path, "cgroup");
-    ns_paths->mnt = append_string(proc_self_ns_path, "mnt");
-    ns_paths->uts = append_string(proc_self_ns_path, "uts");
-    ns_paths->net = append_string(proc_self_ns_path, "net");
+    ns_paths->ipc = append_string(base_path, "/ipc");
+    ns_paths->pid = append_string(base_path, "/pid");
+    ns_paths->cgroup = append_string(base_path, "/cgroup");
+    ns_paths->mnt = append_string(base_path, "/mnt");
+    ns_paths->uts = append_string(base_path, "/uts");
+    ns_paths->net = append_string(base_path, "/net");
+
+    free(base_path);  // Clean up base path
 
     return ns_paths;
 }
