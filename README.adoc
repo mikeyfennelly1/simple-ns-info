@@ -15,7 +15,7 @@ cd simple-ns-info
 
 _*What was the point of that?*_
 
-What just happened, was the process cloned itself, and created an orphan process. This orphan is now a child of systemd and in it's own namespaces, those being:
+What just happened, was the process cloned itself, creating a child process, and then that child exec'd a bash session, and the parent exited, creating an orphan bash process. This orphan is now a child of systemd and because of the flags in the call to the aforementioned clone() function it is now it's own namespaces, those being:
 
 - Mount namespace
 - Network Namespace
