@@ -20,6 +20,6 @@ typedef struct {
 } NAMESPACE_PATHS;
 
 NAMESPACE_INODES* get_ns_inodes(void);
-void print_ns_inodes(NAMESPACE_INODES* ns_inodes);
+void print_ns_inodes();
 
 #endif

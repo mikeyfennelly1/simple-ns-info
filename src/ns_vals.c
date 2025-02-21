@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "./ns_vals.h"
+#include "../include/ns_vals.h"
 
 // gets paths for hardlinks to namespace inodes
 // in /proc directory for this process
@@ -91,8 +91,10 @@ NAMESPACE_INODES* get_ns_inodes(void)
     return ns_inodes;
 }
 
-void print_ns_inodes(NAMESPACE_INODES* ns_inodes)
+void print_ns_inodes()
 {
+    NAMESPACE_INODES* ns_inodes = get_ns_inodes();
+
     printf("IPC namespace inode: %ld\n", ns_inodes->ipc);
     printf("MNT namespace inode: %ld\n", ns_inodes->mnt);
     printf("PID namespace inode: %ld\n", ns_inodes->pid);

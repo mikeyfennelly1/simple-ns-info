@@ -1,0 +1,1 @@
+void isolate_ns(void);
