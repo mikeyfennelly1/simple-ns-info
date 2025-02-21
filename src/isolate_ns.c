@@ -1,37 +1,39 @@
 /**
- * unshare.c
+ * isolate_ns.c
  * 
- * Use unshare(2) syscall to enter new namespaces.
- *      see https://man7.org/linux/man-pages/man2/unshare.2.html
- * 
- *
- * By default, a new namespace is cleaned up if no processes reside in it.
- * Whether you use fork/exec or just unshare(), result is the same.
+ * Create orphan bash process in new namesapce.
  *
  * Author: Mikey Fennelly
  */
 
- #ifndef _GNU_SOURCE
- #define _GNU_SOURCE
- #endif
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 
 #include <sched.h> 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include <semaphore.h>
 #include "../include/ns_vals.h"
 
-#ifndef STACK_SIZE
-#define  STACK_SIZE (1024 * 1024)
-#endif
+#define  CHILD_STACK_SIZE (1024 * 1024)
+#define PARENT_ORPHAN_FIFO "parent_child_fifo"
+
+sem_t semFuel;
 
 int child_function(void *arg)
 {
-    printf("\n\n");
-    printf("Child process (PID: %d) namespace inode values: \n", getpid());
+    sem_wait(&semFuel);
+    
+    printf("\n\nChild process (PID: %d) namespace inode values: \n", getpid());
     print_ns_inodes();
     
     char *argv[] = {"/bin/bash", NULL};
@@ -40,7 +42,9 @@ int child_function(void *arg)
         perror("execve");
         return 1;
     };
-    
+
+    sem_post(&semFuel);
+
     sleep(2000);
 }
 
@@ -54,27 +58,35 @@ int child_function(void *arg)
 void isolate_ns(void)
 {
     // malloc stack for child process
-    char *stack = malloc(STACK_SIZE);
+    char *stack = malloc(CHILD_STACK_SIZE);
     if (!stack)
     {
         perror("Attempted malloc for stack of child proc failed.");
         exit(1);
     }
-    char *stack_top = stack + STACK_SIZE;
+    char *stack_top = stack + CHILD_STACK_SIZE;
+
+    sem_init(&semFuel, 1, 0);
 
     // Create a child process, using unshare(2) flags to create and enter new namespaces 
     pid_t child_pid = clone(
         child_function, 
         stack_top,
-        SIGCHLD |
-        CLONE_NEWNS | CLONE_NEWCGROUP | CLONE_NEWNET | CLONE_NEWPID | CLONE_NEWUSER | CLONE_NEWUTS, NULL);
+        SIGCHLD | CLONE_NEWNS | CLONE_NEWCGROUP | CLONE_NEWNET | CLONE_NEWPID | CLONE_NEWUSER | CLONE_NEWUTS | CLONE_NEWIPC,
+        NULL
+    );
+ 
     if (child_pid == -1)
     {
         perror("Error cloning.");
         free(stack);
+        sem_destroy(&semFuel);
         exit(EXIT_FAILURE);
     }
 
+    sem_post(&semFuel);
+
+    sem_destroy(&semFuel);
     printf("Parent process (PID %d) exiting...\n", getpid());
     exit(EXIT_SUCCESS);  // parent exits to orphan child
 }
