@@ -5,7 +5,7 @@ SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
 
-TARGET = $(BIN_DIR)/app
+TARGET = $(BIN_DIR)/simple-ns-info
 
 SRCS = $(wildcard $(SRC_DIR)/*.c)
 

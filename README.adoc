@@ -1,0 +1,31 @@
+= simple-ns-info
+
+== Purpose
+
+To demonstrate the usage of process isolation by namespaces. These are a kernel feature that can isolate a process view of the host OS environmennt, and is used extensively in container technology.
+
+== Install and run
+
+[source, bash]
+----
+git clone git@github.com:mikeyfennelly1/simple-ns-info.git
+cd simple-ns-info
+./run.sh
+----
+
+_*What was the point of that?*_
+
+What just happened, was the process cloned itself, and created an orphan process. This orphan is now a child of systemd and in it's own namespaces, those being:
+
+- Mount namespace
+- Network Namespace
+- IPC namespace
+- cgroup namespace
+- PID namespace
+- User namespace
+
+Every process runs in the 'root namespace' by default, and any namespace you create thereafter is a child of that root namespace. If you run `ps` you will see the simple-ns-info process running.
+
+If you try to kill this process from your current terminal session however, it won't work. Because the process is in its own IPC namespace it doesn't actually receive the kill signal from your shell session - which is running in the root namespace by default.
+
+Interesting stuff!
