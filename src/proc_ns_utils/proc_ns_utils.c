@@ -1,7 +1,7 @@
 /**
- * ns_vals.c
+ * proc_ns_utils.c
  * 
- * Compare the namespaces that a process is in by reading inode values.
+ * Utilities for interacting with the /proc/<pid>/ns directory.
  * 
  * Author: Mikey Fennelly
  */
@@ -10,11 +10,10 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/stat.h>
 #include "../include/ns_vals.h"
+#include "../misc_file_utils/misc_file_utils.c"
 
 // gets paths for hardlinks to namespace inodes
-// in /proc directory for this process
 //
 // returns as type NAMESPACE_PATHS*
 char* get_proc_self_ns_path(void)
@@ -39,18 +38,9 @@ char* get_proc_self_ns_path(void)
     return proc_self_ns;
 }
 
-char* append_string(const char* base, const char* to_append) {
-    size_t new_len = strlen(base) + strlen(to_append) + 1;
-    char* new_str = malloc(new_len);
-    if (!new_str) {
-        printf("Failed to allocate memory\n");
-        exit(1);
-    }
-    strcpy(new_str, base);
-    strcat(new_str, to_append);
-    return new_str;
-}
-
+// gets paths to individual namespace file nodes
+//
+// returns NAMESPACE_PATHS*
 NAMESPACE_PATHS* get_namespace_paths(void) {
     NAMESPACE_PATHS* ns_paths = (NAMESPACE_PATHS*) malloc(sizeof(NAMESPACE_PATHS));
     char* base_path = get_proc_self_ns_path();
@@ -66,14 +56,6 @@ NAMESPACE_PATHS* get_namespace_paths(void) {
 
     return ns_paths;
 }
-
-// gets inode value for file at <path>
-unsigned long get_inode_value(char* path)
-{
-    struct stat filestat;
-    stat(path, &filestat);
-    return (unsigned long)filestat.st_ino;
-} 
 
 // returns NAMESPACE_INODES for current process
 NAMESPACE_INODES* get_ns_inodes(void)

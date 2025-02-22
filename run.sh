@@ -1,4 +1,4 @@
 make clean
 make
 
-./bin/app
+./bin/simple-ns-info

@@ -29,7 +29,8 @@
 
 sem_t semFuel;
 
-int child_function(void *arg)
+// this is the orphan that runs in a namespace of its own
+int isolated_proc_function(void *arg)
 {
     sem_wait(&semFuel);
     
@@ -52,9 +53,6 @@ int child_function(void *arg)
 // Character is representative of desired namespace type.
 // 
 // The namespace flags are as specified in https://man7.org/linux/man-pages/man2/unshare.2.html
-//
-//  returns -1 if failure, 0 if success
-
 void isolate_ns(void)
 {
     // malloc stack for child process
@@ -70,7 +68,7 @@ void isolate_ns(void)
 
     // Create a child process, using unshare(2) flags to create and enter new namespaces 
     pid_t child_pid = clone(
-        child_function, 
+        isolated_proc_function, 
         stack_top,
         SIGCHLD | CLONE_NEWNS | CLONE_NEWCGROUP | CLONE_NEWNET | CLONE_NEWPID | CLONE_NEWUSER | CLONE_NEWUTS | CLONE_NEWIPC,
         NULL
