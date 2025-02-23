@@ -1,14 +1,24 @@
 #include <unistd.h>
 #include <sched.h>
 #include <signal.h>
-#include "../include/ns_vals.h"
+#include <../../include/types/ns_types.h>
 #include "../misc_file_utils/misc_file_utils.c"
+#include <strings.h>
+
+int join_existing_ns(NAMESPACE_PATHS* ns_paths)
+{
+    
+}
 
 // enters the execution environment of the target process
 // via manipulating it's vals of ns_proxy.
-int container_reaper(const unsigned long ipc_ns_inode, const unsigned int target_pid)
+int container_reaper(const unsigned long ipc_ns_inode, const unsigned long target_pid)
 {
-    char* target_pid_proc_dir = ;
+    char* target_pid_str = malloc(sizeof(unsigned long));
+    sprintf(target_pid_str, "%ld", target_pid);
+
+    char* target_proc_dir_components[] = {"/proc", target_pid_str, "/", "ns"};
+    char* target_pid_proc_dir = concatenate_strings(target_proc_dir_components, 4);
 }
 
 // When called, process is initialised a userland_lifecycle_manger

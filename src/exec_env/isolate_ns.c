@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <semaphore.h>
-#include "../include/ns_vals.h"
 
 #define  CHILD_STACK_SIZE (1024 * 1024)
 #define PARENT_ORPHAN_FIFO "parent_child_fifo"

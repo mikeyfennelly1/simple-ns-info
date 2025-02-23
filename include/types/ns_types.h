@@ -1,6 +1,3 @@
-#ifndef NS_VALS_H
-#define NS_VALS_H
-
 typedef struct {
     unsigned long ipc;
     unsigned long uts;
@@ -18,8 +15,3 @@ typedef struct {
     char* cgroup;
     char* net;
 } NAMESPACE_PATHS;
-
-NAMESPACE_INODES* get_ns_inodes(void);
-void print_ns_inodes();
-
-#endif
